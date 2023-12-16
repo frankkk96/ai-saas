@@ -2,7 +2,7 @@
 
 import * as z from 'zod'
 import Heading from '@/components/Heading'
-import { MessageSquare } from 'lucide-react'
+import { Code } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { formSchema } from './constants'
@@ -18,7 +18,7 @@ import Loader from '@/components/Loader'
 import { cn } from '@/lib/utils'
 import UserAvatar from '@/components/UserAvatar'
 import BotAvatar from '@/components/BotAvatar'
-
+import ReactMarkdown from 'react-markdown'
 
 type Props = {}
 
@@ -41,7 +41,7 @@ const page = (props: Props) => {
         content: values.prompt
       }
       const newMessages = [...messages, userMessage]
-      const response = await axios.post('/api/conversation', {
+      const response = await axios.post('/api/code', {
         messages: newMessages
       })
       setMessages((current) => [...current, userMessage, response.data])
@@ -56,11 +56,11 @@ const page = (props: Props) => {
   return (
     <div>
       <Heading
-        title='Conversation'
-        description='Chat with AI'
-        icon={MessageSquare}
-        iconColor='text-violet-500'
-        bgColor='bg-violet-500/10'
+        title='Code Generation'
+        description='Generate code using descriptive text.'
+        icon={Code}
+        iconColor='text-green-700'
+        bgColor='bg-green-700/10'
       />
       <div className='px-4 lg:px-8'>
        <div>
@@ -87,7 +87,7 @@ const page = (props: Props) => {
                   <FormControl className='m-0 p-0'>
                     <Input className='border-0 outline-none focus-visible:ring-0 focuse-visible:ring-transparent'
                       disabled={isLoading}
-                      placeholder='How do I calculate the radius of a circle?'
+                      placeholder='Simple toggle button using react hooks.'
                       {...field}
                     />
                   </FormControl>
@@ -115,9 +115,21 @@ const page = (props: Props) => {
                  className={cn('p-8 w-full flex items-start gap-x-8 rounded-lg', message.role === "user" ? 'bg-white border border-black/10' : 'bg-muted')}      
             >
               {message.role === "user" ? <UserAvatar /> : <BotAvatar />}
-              <p className='text-sm'>
-                {message.content}
-              </p>
+              <ReactMarkdown
+                components={{
+                  pre: ({ node, ...props }) => (
+                    <div className='overflow-auto w-full my-2 bg-black/10 p-2 rounded-lg'>
+                      <pre {...props} />
+                    </div>
+                  ),
+                  code: ({ node, ...props}) => (
+                    <code className='bg-black/10 rounded-lg p-1' {...props} />
+                  )
+                }}
+                className='text-sm overflow-hidden leading-7'
+              >
+                {message.content || ""}
+              </ReactMarkdown>
             </div>
            ))}
          </div>
