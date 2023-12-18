@@ -18,11 +18,13 @@ import Loader from '@/components/Loader'
 import { cn } from '@/lib/utils'
 import UserAvatar from '@/components/UserAvatar'
 import BotAvatar from '@/components/BotAvatar'
+import { useProModal } from '@/hooks/UseProModal'
 
 
 type Props = {}
 
 const page = (props: Props) => {
+  const proModal = useProModal()
   const router = useRouter()
   const [music , setMusic] = React.useState<string>()
  
@@ -40,8 +42,10 @@ const page = (props: Props) => {
       const response = await axios.post('/api/music', values)
       setMusic(response.data.audio)
       form.reset()
-    } catch (error) {
-      console.log(error)
+    } catch (error: any) {
+      if (error?.response?.status === 403) {
+        proModal.onOpen()
+      }
     } finally {
       router.refresh()
     }

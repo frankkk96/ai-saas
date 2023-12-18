@@ -21,11 +21,13 @@ import { imageConfigDefault } from 'next/dist/shared/lib/image-config'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Card, CardFooter } from '@/components/ui/card'
 import Image from 'next/image'
+import { useProModal } from '@/hooks/UseProModal'
 
 
 type Props = {}
 
 const page = (props: Props) => {
+  const proModal = useProModal()
   const router = useRouter()
   const [images, setImages] = React.useState<string[]>([])
 
@@ -47,8 +49,10 @@ const page = (props: Props) => {
       const urls = response.data.map((image: { url: string }) => image.url)
       setImages(urls)
       form.reset()
-    } catch (error) {
-      console.log(error)
+    } catch (error: any) {
+      if (error?.response?.status === 403) {
+        proModal.onOpen()
+      }
     } finally {
       router.refresh()
     }

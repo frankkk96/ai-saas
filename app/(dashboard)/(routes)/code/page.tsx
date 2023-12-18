@@ -19,10 +19,12 @@ import { cn } from '@/lib/utils'
 import UserAvatar from '@/components/UserAvatar'
 import BotAvatar from '@/components/BotAvatar'
 import ReactMarkdown from 'react-markdown'
+import { useProModal } from '@/hooks/UseProModal'
 
 type Props = {}
 
 const page = (props: Props) => {
+  const proModal = useProModal()
   const router = useRouter()
   const [messages, setMessages] = React.useState<Message[]>([])
 
@@ -46,8 +48,10 @@ const page = (props: Props) => {
       })
       setMessages((current) => [...current, userMessage, response.data])
       form.reset()
-    } catch (error) {
-      console.log(error)
+    } catch (error: any) {
+      if (error?.response?.status === 403) {
+        proModal.onOpen()
+      }
     } finally {
       router.refresh()
     }
