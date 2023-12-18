@@ -1,7 +1,7 @@
 import { auth } from "@clerk/nextjs"
 import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
-
+import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit"
 
 export type Message = {
     role: 'user' | 'system'
@@ -38,6 +38,13 @@ export async function POST(
         if (!resolution) {
             throw new NextResponse('Resolution is required', {status: 400})
         }
+
+        const freeTrail = await checkApiLimit()
+        if (!freeTrail) {
+            throw new NextResponse('Free trail has ended', {status: 403})
+        }
+
+        await increaseApiLimit()
 
         const response = await openai.images.generate({
             model: "dall-e-2",
