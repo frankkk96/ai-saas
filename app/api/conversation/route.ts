@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs"
 import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit"
+import { checkSubscription } from "@/lib/subscription"
 
 export type Message = {
     role: 'user' | 'system'
@@ -32,7 +33,8 @@ export async function POST(
         }
 
         const freeTrail = await checkApiLimit()
-        if (!freeTrail) {
+        const isPro = await checkSubscription()
+        if (!isPro && !freeTrail) {
             return new NextResponse('Free trail has ended', {status: 403})
         }
 
@@ -40,8 +42,9 @@ export async function POST(
             model: "gpt-3.5-turbo",
             messages
         })
-
-        await increaseApiLimit()
+        if (!isPro) {
+            await increaseApiLimit()
+        }
 
         return NextResponse.json({role: 'assistant', content: response.choices[0].message.content})
     } catch (error) {

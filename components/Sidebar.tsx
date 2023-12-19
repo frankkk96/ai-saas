@@ -12,6 +12,7 @@ const monsterrat = Montserrat({ weight: "600", subsets: ["latin"] })
 
 type Props = {
   apiLimitCount: number
+  isPro: boolean
 }
 
 const routes = [
@@ -58,7 +59,7 @@ const routes = [
   },
 ]
 
-const Sidebar = ({ apiLimitCount=0 }: Props) => {
+const Sidebar = ({ apiLimitCount=0, isPro=false }: Props) => {
   const pathName = usePathname()
   return (
     <div className='space-y-4 py-4 flex flex-col h-full bg-[#111827] text-white'>
@@ -85,7 +86,7 @@ const Sidebar = ({ apiLimitCount=0 }: Props) => {
           ))}
         </div>
       </div>
-      <FreeCounter apiLimitCount={apiLimitCount} />
+      <FreeCounter apiLimitCount={apiLimitCount} isPro={isPro} />
     </div>
   )
 }
