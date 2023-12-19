@@ -10,9 +10,10 @@ import { useProModal } from '@/hooks/UseProModal'
 
 type Props = {
   apiLimitCount: number
+  isPro: boolean
 }
 
-const FreeCounter = ({apiLimitCount=0}: Props) => {
+const FreeCounter = ({apiLimitCount=0, isPro=false}: Props) => {
   const proModal = useProModal()
   const [mounted, setMounted] = useState(false)
 
@@ -21,6 +22,10 @@ const FreeCounter = ({apiLimitCount=0}: Props) => {
   }, [])
   
   if (!mounted) {
+    return null
+  }
+
+  if (isPro) {
     return null
   }
 

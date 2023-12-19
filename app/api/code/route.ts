@@ -2,6 +2,7 @@ import { auth } from "@clerk/nextjs"
 import { NextResponse } from "next/server"
 import { OpenAI } from "openai"
 import { checkApiLimit, increaseApiLimit } from "@/lib/api-limit"
+import { checkSubscription } from "@/lib/subscription"
 
 export type Message = {
     role: 'user' | 'system'
@@ -25,20 +26,21 @@ export async function POST(
         const body = await req.json()
         const {messages} = body
         if (!userId) {
-            throw new NextResponse('Unauthorized', {status: 401})
+            return new NextResponse('Unauthorized', {status: 401})
         }
 
         if (!openai.apiKey) {
-            throw new NextResponse('OpenAI api key not configured', {status: 500})
+            return new NextResponse('OpenAI api key not configured', {status: 500})
         }
 
         if (!messages) {
-            throw new NextResponse('Message is required', {status: 400})
+            return new NextResponse('Message is required', {status: 400})
         }
 
         const freeTrail = await checkApiLimit()
-        if (!freeTrail) {
-            throw new NextResponse('Free trail has ended', {status: 403})
+        const isPro = await checkSubscription()
+        if (!isPro && !freeTrail) {
+            return new NextResponse('Free trail has ended', {status: 403})
         }
 
         const response = await openai.chat.completions.create({
@@ -46,7 +48,9 @@ export async function POST(
             messages: [instructionMessage, ...messages]
         })
 
-        await increaseApiLimit()
+        if (!isPro) {
+            await increaseApiLimit()
+        }
 
         return NextResponse.json({role: 'assistant', content: response.choices[0].message.content})
     } catch (error) {

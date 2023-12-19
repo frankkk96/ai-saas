@@ -5,12 +5,13 @@ import MobileSidebar from './MobileSidebar'
 
 type Props = {
   apiLimitCount: number
+  isPro: boolean
 }
 
-const Navbar = ({ apiLimitCount }: Props) => {
+const Navbar = ({ apiLimitCount, isPro }: Props) => {
   return (
     <div className='flex items-center p-4'>
-        <MobileSidebar apiLimitCount={apiLimitCount} />
+        <MobileSidebar apiLimitCount={apiLimitCount} isPro={isPro} />
         <div className='flex w-full justify-end'>
           <UserButton afterSignOutUrl='/' />
         </div>
